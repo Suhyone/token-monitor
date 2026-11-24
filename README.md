@@ -1,16 +1,28 @@
 # Token Monitor
 
-Local dashboard showing token usage and estimated cost of AI coding agents (Claude Code, Antigravity, Codex), read from their local log files.
+Zero-config local dashboard showing token usage, daily volume, per-question token breakdown, and 7-day request history across AI coding agents.
 
-## Run
+## Auto-detected AI Providers
 
-Requires Node.js (no npm install needed).
+Automatically detects local logs when you use:
+- **Claude Code** (`~/.claude/projects`, `~/.config/claude/projects`, `$CLAUDE_CONFIG_DIR`)
+- **Antigravity** (`~/.gemini/antigravity/brain`, `~/.gemini/jetski/brain`)
+- **OpenAI Codex CLI** (`~/.codex/sessions`, `$CODEX_HOME`)
+- **Google Gemini CLI** (`~/.gemini/tmp/*/chats/*.json`)
+- **OpenCode** (`~/.local/share/opencode/storage/message`)
+- **Cline / Roo Code** (VS Code globalStorage)
+- **Proxy fallback** (`--proxy=PORT` for any OpenAI/Anthropic/Gemini-compatible tool)
 
-- Windows: double-click `start.bat` (opens http://localhost:8787). Close the window or run `stop.bat` to stop.
-- Any OS: `npm start`
+## Run (Zero-Config)
 
-## Config
+Requires Node.js (no `npm install` needed):
 
-Edit `config.json`: port, THB/USD rate, daily budget, log paths, and pricing per model (USD per 1M tokens, first regex match wins).
+- **Windows**: double-click `start.bat` (opens http://localhost:8787)
+- **macOS / Linux**: `./start.sh` or `npm start`
 
-Note: for Claude, `in` counts only non-cached input; real input = `in + cache read + cache write`.
+## Features
+
+- **6-Minute Resolution Chart** with hover time window (`HH:MM - HH:MM`), Tokens / Requests / Cost switcher
+- **Daily Volume Table** (14 days) with Input / Output / Cache Read / Cache Write breakdown
+- **Per-Question Tracking** (groups all tool calls from prompt to final output, merging interrupting follow-up questions)
+- **7-Day Request History** with day/provider/search filters and automatic gradual pruning after 7 days

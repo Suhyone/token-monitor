@@ -5,173 +5,369 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Token Monitor</title>
 <style>
-:root{--bg:#0f1115;--card:#171a21;--line:#262b36;--tx:#e6e8ee;--mut:#8b93a5;--claude:#d97757;--agy:#4f8cff;--proxy:#9b8cff;--ok:#3ecf8e;--warn:#f5b942;--bad:#ef5350}
-@media(prefers-color-scheme:light){:root{--bg:#f4f5f8;--card:#fff;--line:#e2e5ec;--tx:#1b1f2a;--mut:#667085}}
+:root{--bg:#0f1115;--card:#171a21;--card2:#1c2029;--line:#262b36;--tx:#e6e8ee;--mut:#8b93a5;--ok:#3ecf8e;--warn:#f5b942;--bad:#ef5350;--in:#60a5fa;--out:#f472b6;--cr:#34d399;--cw:#fbbf24}
+@media(prefers-color-scheme:light){:root{--bg:#f4f5f8;--card:#fff;--card2:#f8f9fc;--line:#e2e5ec;--tx:#1b1f2a;--mut:#667085}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,"Segoe UI",sans-serif}
-.wrap{max-width:1280px;margin:0 auto;padding:16px}
-header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-h1{font-size:18px;margin:0;flex:1}
-.pill{padding:2px 10px;border-radius:99px;background:var(--card);border:1px solid var(--line);color:var(--mut);font-size:12px}
+body{margin:0;background:var(--bg);color:var(--tx);font:13.5px/1.45 system-ui,"Segoe UI",sans-serif}
+.wrap{max-width:1360px;margin:0 auto;padding:16px}
+header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-size:18px;margin:0;flex:1;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pill{padding:3px 10px;border-radius:99px;background:var(--card);border:1px solid var(--line);color:var(--mut);font-size:12px;white-space:nowrap}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--mut);margin-right:6px}
 .dot.on{background:var(--ok);box-shadow:0 0 8px var(--ok)}
-.grid{display:grid;gap:12px}
-.cards{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:12px}
-.two{grid-template-columns:repeat(auto-fit,minmax(340px,1fr));margin-bottom:12px}
+.grid{display:grid;gap:12px;margin-bottom:12px}
+.cards{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.two{grid-template-columns:repeat(auto-fit,minmax(380px,1fr))}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
-.card h2{font-size:12px;font-weight:600;color:var(--mut);margin:0 0 6px;text-transform:uppercase;letter-spacing:.04em}
-.big{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
-.sub{color:var(--mut);font-size:12px}
-.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:8px}
-.bar>i{display:block;height:100%;background:var(--ok);width:0;transition:width .4s}
-.bar.warn>i{background:var(--warn)}.bar.bad>i{background:var(--bad)}
-.alert{display:none;margin-bottom:12px;padding:10px 14px;border-radius:8px;font-weight:600}
-.alert.warn{display:block;background:#f5b94222;border:1px solid var(--warn);color:var(--warn)}
-.alert.bad{display:block;background:#ef535022;border:1px solid var(--bad);color:var(--bad)}
-.tabs{display:flex;gap:4px;float:right}
-.tabs button{background:none;border:1px solid var(--line);color:var(--mut);padding:2px 10px;border-radius:6px;cursor:pointer;font:inherit;font-size:12px}
-.tabs button.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-th,td{text-align:right;padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.card-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.card h2{font-size:12px;font-weight:600;color:var(--mut);margin:0;text-transform:uppercase;letter-spacing:.04em}
+.big{font-size:25px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.sub{color:var(--mut);font-size:12px;margin-top:3px}
+.stack{display:flex;height:7px;border-radius:4px;overflow:hidden;background:var(--line);margin-top:8px}
+.stack i{display:block;height:100%}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tabs button{background:none;border:1px solid var(--line);color:var(--mut);padding:3px 10px;border-radius:6px;cursor:pointer;font:inherit;font-size:12px}
+.tabs button.on{background:var(--tx);color:var(--bg);border-color:var(--tx);font-weight:600}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:12.5px}
+th,td{text-align:right;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
 th:first-child,td:first-child,th.l,td.l{text-align:left}
-th{color:var(--mut);font-weight:600;font-size:12px;position:sticky;top:0;background:var(--card)}
-.scroll{max-height:340px;overflow:auto}
-.tag{display:inline-block;padding:0 7px;border-radius:4px;font-size:11px;font-weight:600;color:#fff}
-.tag.claude{background:var(--claude)}.tag.agy{background:var(--agy)}.tag.proxy{background:var(--proxy)}
-canvas{width:100%;height:230px;display:block}
-.legend{font-size:12px;color:var(--mut)}.legend b{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 4px 0 10px;vertical-align:middle}
-.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.cmp .big{font-size:20px}
-.cfg{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
-.cfg input{width:110px;background:var(--bg);border:1px solid var(--line);color:var(--tx);border-radius:6px;padding:3px 6px}
-.cfg button{background:var(--tx);color:var(--bg);border:0;border-radius:6px;padding:4px 12px;cursor:pointer}
-@keyframes fl{from{background:#3ecf8e33}to{background:transparent}}
+th{color:var(--mut);font-weight:600;font-size:11.5px;position:sticky;top:0;background:var(--card);z-index:1}
+td.wrap-tx{white-space:normal;min-width:200px;max-width:380px;word-break:break-word}
+.scroll{max-height:360px;overflow:auto}
+.tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:600;color:#fff}
+.badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:600;background:var(--card2);border:1px solid var(--line);color:var(--tx)}
+.badge.run{border-color:var(--ok);color:var(--ok)}
+.badge.int{border-color:var(--warn);color:var(--warn)}
+canvas{width:100%;height:250px;display:block;cursor:crosshair}
+.legend{font-size:12px;color:var(--mut);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.legend b{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 4px 0 8px;vertical-align:middle}
+.cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px}
+.ag-box{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:10px}
+.ag-box .big{font-size:19px;margin-top:4px}
+.vol-bar{display:inline-block;height:6px;border-radius:3px;background:var(--in);vertical-align:middle;margin-right:6px}
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.filters select,.filters input{background:var(--bg);border:1px solid var(--line);color:var(--tx);border-radius:6px;padding:4px 8px;font:inherit;font-size:12px}
+.pager{display:flex;align-items:center;gap:8px;justify-content:flex-end;margin-top:8px;font-size:12px;color:var(--mut)}
+.pager button{background:var(--card2);border:1px solid var(--line);color:var(--tx);border-radius:6px;padding:3px 10px;cursor:pointer;font:inherit}
+.pager button:disabled{opacity:.4;cursor:default}
+@keyframes fl{from{background:#3ecf8e22}to{background:transparent}}
 tr.new td{animation:fl 1.5s}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>Token Monitor <span class="sub">Claude Code · Antigravity</span></h1>
+    <h1>Token Monitor <span id="provPills"></span></h1>
     <span class="pill" id="conn"><span class="dot"></span>connecting</span>
     <span class="pill" id="asof">-</span>
     <span class="pill" id="mem">-</span>
   </header>
-  <div class="alert" id="alert"></div>
 
   <div class="grid cards">
-    <div class="card"><h2>Total tokens (วันนี้)</h2><div class="big" id="tTok">-</div><div class="sub" id="tTokSub"></div></div>
-    <div class="card"><h2>Est. cost (วันนี้)</h2><div class="big" id="tCost">-</div><div class="sub" id="tCostSub"></div></div>
-    <div class="card"><h2>Cache hit rate</h2><div class="big" id="tCache">-</div><div class="sub" id="tCacheSub"></div></div>
-    <div class="card"><h2>Active sessions</h2><div class="big" id="tAct">-</div><div class="sub" id="tActSub">activity ใน 5 นาทีล่าสุด</div></div>
-    <div class="card"><h2>Daily budget</h2><div class="big" id="bPct">-</div><div class="bar" id="bBar"><i></i></div><div class="sub" id="bSub"></div>
-      <div class="cfg"><input id="cfgTok" type="number" title="tokens/day" placeholder="tokens"><input id="cfgUsd" type="number" step="0.1" title="USD/day" placeholder="USD"><button id="cfgSave">Save</button></div></div>
-  </div>
-
-  <div class="grid two">
-    <div class="card"><h2>Agent breakdown (all-time)</h2><div class="cmp" id="cmp"></div></div>
-    <div class="card"><h2>By model</h2><div class="scroll" style="max-height:200px"><table id="models"></table></div></div>
+    <div class="card">
+      <h2>Tokens วันนี้</h2>
+      <div class="big" id="tTok">-</div>
+      <div class="stack" id="tStack"></div>
+      <div class="sub" id="tTokSub">-</div>
+    </div>
+    <div class="card">
+      <h2>คำถามวันนี้ (1 คำถามจนเสร็จ)</h2>
+      <div class="big" id="tQ">-</div>
+      <div class="sub" id="tQSub">-</div>
+    </div>
+    <div class="card">
+      <h2>ปริมาณ 7 วันล่าสุด</h2>
+      <div class="big" id="wTok">-</div>
+      <div class="sub" id="wSub">-</div>
+    </div>
+    <div class="card">
+      <h2>Cache Hit Rate</h2>
+      <div class="big" id="tCache">-</div>
+      <div class="sub" id="tCacheSub">-</div>
+    </div>
+    <div class="card">
+      <h2>Est. Cost (ประมาณการ)</h2>
+      <div class="big" id="tCost">-</div>
+      <div class="sub" id="tCostSub">-</div>
+    </div>
   </div>
 
   <div class="card" style="margin-bottom:12px">
-    <h2>Usage <span class="tabs" id="tabs"><button data-r="today" class="on">รายวัน</button><button data-r="week">รายสัปดาห์</button><button data-r="month">รายเดือน</button><button data-r="all">ทั้งหมด</button></span></h2>
+    <div class="card-hd">
+      <h2>กราฟการใช้โทเคน</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div class="tabs" id="mtabs"><button data-m="tok" class="on">Tokens</button><button data-m="n">Requests</button><button data-m="cost">Cost</button></div>
+        <div class="tabs" id="tabs"><button data-r="today" class="on">วันนี้ (ราย 6 นาที)</button><button data-r="week">7 วันล่าสุด</button><button data-r="month">30 วันล่าสุด</button><button data-r="all">ทั้งหมด</button></div>
+      </div>
+    </div>
     <div class="legend" id="legend"></div><style id="agstyle"></style>
     <canvas id="chart"></canvas>
   </div>
 
-  <div class="card"><h2>Live requests (ล่าสุด 100)</h2>
-    <div class="scroll"><table id="feed"></table></div></div>
-  <p class="sub">ราคาเป็นค่าประมาณจาก config.json (pricing) — ตรวจ/แก้ให้ตรงกับราคาจริงได้</p>
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-hd"><h2>ปริมาณการใช้ต่อวัน (14 วันล่าสุด)</h2><span class="sub" id="dailyAvg">-</span></div>
+    <div class="scroll" style="max-height:280px"><table id="dailyTbl"></table></div>
+  </div>
+
+  <div class="grid two">
+    <div class="card"><div class="card-hd"><h2>แยกตามค่าย AI (Auto-detected)</h2></div><div class="cmp" id="cmp"></div></div>
+    <div class="card"><div class="card-hd"><h2>แยกตาม Model</h2></div><div class="scroll" style="max-height:250px"><table id="models"></table></div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-hd">
+      <h2>การใช้โทเคนต่อ 1 คำถาม (รวมคำถามแทรกจนจบเอาท์พุต)</h2>
+      <span class="sub">คิดรวมตั้งแต่ถามจนได้คำตอบสุดท้าย</span>
+    </div>
+    <div class="filters">
+      <select id="tDay"><option value="all">ทุกวัน (7 วันล่าสุด)</option></select>
+      <select id="tAg"><option value="all">ทุกค่าย AI</option></select>
+      <input id="tQry" type="search" placeholder="ค้นหาคำถาม / model / session...">
+    </div>
+    <div class="scroll"><table id="turnsTbl"></table></div>
+    <div class="pager"><span id="tInfo">-</span><button id="tPrev">◀ ก่อนหน้า</button><button id="tNext">ถัดไป ▶</button></div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <h2>ประวัติ Requests (เก็บย้อนหลัง 7 วัน ก่อนค่อยๆ ลบทิ้ง)</h2>
+      <span class="sub" id="retNote">-</span>
+    </div>
+    <div class="filters">
+      <select id="rDay"><option value="all">ทุกวัน (7 วันล่าสุด)</option></select>
+      <select id="rAg"><option value="all">ทุกค่าย AI</option></select>
+      <input id="rQry" type="search" placeholder="ค้นหา model / session...">
+    </div>
+    <div class="scroll"><table id="reqTbl"></table></div>
+    <div class="pager"><span id="rInfo">-</span><button id="rPrev">◀ ก่อนหน้า</button><button id="rNext">ถัดไป ▶</button></div>
+  </div>
 </div>
+
 <script>
 const $=id=>document.getElementById(id);
 const NAMES={},COL={};
-const nf=n=>n>=1e9?(n/1e9).toFixed(2)+'B':n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':String(Math.round(n));
-const int=n=>Math.round(n).toLocaleString();
-const usd=n=>'$'+n.toFixed(n<10?3:2);
-let S=null,range='today',lastTop=0,cfgInit=false,tip=null;
+const nf=n=>n>=1e9?(n/1e9).toFixed(2)+'B':n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':String(Math.round(n||0));
+const int=n=>Math.round(n||0).toLocaleString();
+const usd=n=>'$'+(n||0).toFixed(n<10?3:2);
+const fmtDur=ms=>{if(ms<1000)return Math.max(0,ms)+'ms';const s=Math.round(ms/1000);return s<60?s+'s':Math.floor(s/60)+'m '+(s%60)+'s';};
+const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let S=null,range='today',metric='tok',hoverIdx=-1,tip=null;
+let tPage=1,rPage=1,lastTop=0,filtersInit=false;
 
 function render(s){
   S=s;
-  for(const k in s.meta){NAMES[k]=s.meta[k].name;COL[k]=s.meta[k].color}
+  for(const k in s.meta){NAMES[k]=s.meta[k].name;COL[k]=s.meta[k].color;}
+  const agKeys=Object.keys(s.agents);
   $('agstyle').textContent=Object.keys(COL).map(k=>`.tag.${k}{background:${COL[k]}}`).join('');
-  $('legend').innerHTML=Object.keys(s.agents).map(k=>`<b style="background:${COL[k]}"></b>${NAMES[k]}`).join('')+'<span style="float:right"><span id="rangeName"></span><span id="rangeSum"></span></span>';
-  const T=s.totals.today,all=s.totals.all,thb=s.thb;
-  $('asof').textContent='data as of '+new Date(s.asof).toLocaleTimeString()+' · '+int(s.count)+' requests';
-  $('mem').textContent='server RAM '+(s.rss/1048576).toFixed(0)+' MB';
-  $('tTok').textContent=nf(T.tok);
-  $('tTokSub').textContent=`in ${nf(T.i)} · out ${nf(T.o)} · cache ${nf(T.cr+T.cw)} · all-time ${nf(all.tok)}`;
-  $('tCost').textContent=usd(T.cost);
-  $('tCostSub').textContent=`฿${int(T.cost*thb)} · 7D ${usd(s.totals.week.cost)} · all ${usd(all.cost)} (฿${int(all.cost*thb)})`;
-  $('tCache').textContent=(s.cache.today*100).toFixed(1)+'%';
-  $('tCacheSub').textContent='all-time '+(s.cache.all*100).toFixed(1)+'%';
-  $('tAct').textContent=s.active.n;
-  $('tActSub').textContent=s.active.n?s.active.list.map(x=>NAMES[x.split(':')[0]]).filter((v,i,a)=>a.indexOf(v)===i).join(', ')+' · 5 นาทีล่าสุด':'ไม่มี activity ใน 5 นาทีล่าสุด';
+  $('provPills').innerHTML=Object.keys(s.meta).filter(k=>s.agents[k]||k!=='proxy').map(k=>`<span class="tag ${k}" style="margin-right:4px">${NAMES[k]}</span>`).join('');
+  $('asof').textContent='อัปเดต '+new Date(s.asof).toLocaleTimeString('th-TH',{hour12:false})+' · '+int(s.count)+' req (7D)';
+  $('mem').textContent='RAM '+(s.rss/1048576).toFixed(0)+' MB';
   document.querySelector('#conn .dot').className='dot'+(s.active.n?' on':'');
-  // budget
-  const b=s.budget,pt=b.dailyTokens?T.tok/b.dailyTokens:0,pc=b.dailyCostUsd?T.cost/b.dailyCostUsd:0,p=Math.max(pt,pc);
-  const lvl=p>=1?'bad':p>=.8?'warn':'';
-  $('bPct').textContent=(p*100).toFixed(0)+'%';
-  $('bBar').className='bar '+lvl;$('bBar').firstElementChild.style.width=Math.min(100,p*100)+'%';
-  $('bSub').textContent=`tokens ${(pt*100).toFixed(0)}% of ${nf(b.dailyTokens)} · cost ${(pc*100).toFixed(0)}% of ${usd(b.dailyCostUsd)}`;
-  const al=$('alert');al.className='alert '+lvl;
-  al.textContent=lvl==='bad'?`⚠ เกินงบรายวันแล้ว (${(p*100).toFixed(0)}%) — ${nf(T.tok)} tokens / ${usd(T.cost)}`:lvl==='warn'?`⚠ ใช้ไป ${(p*100).toFixed(0)}% ของงบรายวัน`:'';
-  if(!cfgInit){$('cfgTok').value=b.dailyTokens;$('cfgUsd').value=b.dailyCostUsd;cfgInit=true}
-  // agents
-  $('cmp').innerHTML=Object.keys(s.agents).map(k=>{const a=s.agents[k].all,t=s.agents[k].today,cr=(a.i+a.cr+a.cw)?a.cr/(a.i+a.cr+a.cw):0;
-    return `<div><span class="tag ${k}">${NAMES[k]}</span><div class="big">${nf(a.tok)}</div><div class="sub">${usd(a.cost)} · ฿${int(a.cost*thb)}</div>
-    <div class="sub">วันนี้ ${nf(t.tok)} · ${usd(t.cost)}</div><div class="sub">${int(a.n)} req · cache ${(cr*100).toFixed(0)}%</div>
-    <div class="sub">in ${nf(a.i)} · out ${nf(a.o)} · cr ${nf(a.cr)} · cw ${nf(a.cw)}</div></div>`}).join('');
-  $('models').innerHTML='<tr><th>Model</th><th>Req</th><th>Tokens</th><th>Cost</th></tr>'+s.models.map(m=>
-    `<tr><td><span class="tag ${m.agent}">${m.family}</span> ${m.model}</td><td>${int(m.n)}</td><td>${nf(m.tok)}</td><td>${usd(m.cost)}</td></tr>`).join('');
-  // feed
-  const top=s.feed.length?s.feed[0].t:0;
-  $('feed').innerHTML='<tr><th>Time</th><th class="l">Agent</th><th class="l">Model</th><th>Input</th><th>Output</th><th>Cache R</th><th>Cache W</th><th>Cost</th></tr>'+s.feed.map(f=>
-    `<tr class="${f.t>lastTop&&lastTop?'new':''}"><td class="l">${new Date(f.t).toLocaleString('th-TH',{hour12:false,month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'})}</td>
-    <td class="l"><span class="tag ${f.a}">${NAMES[f.a]}</span></td><td class="l">${f.m}</td><td>${int(f.i)}</td><td>${int(f.o)}</td><td>${int(f.cr)}</td><td>${int(f.cw)}</td><td>${usd(f.cost)}</td></tr>`).join('');
-  lastTop=top;
+
+  const T=s.totals.today, W=s.totals.week, ALL=s.totals.all, thb=s.thb;
+  $('tTok').textContent=nf(T.tok);
+  const totSeg=Math.max(1,T.i+T.o+T.cr+T.cw);
+  $('tStack').innerHTML=`<i style="width:${T.i/totSeg*100}%;background:var(--in)" title="Input"></i><i style="width:${T.o/totSeg*100}%;background:var(--out)" title="Output"></i><i style="width:${T.cr/totSeg*100}%;background:var(--cr)" title="Cache Read"></i><i style="width:${T.cw/totSeg*100}%;background:var(--cw)" title="Cache Write"></i>`;
+  $('tTokSub').textContent=`in ${nf(T.i)} · out ${nf(T.o)} · cacheR ${nf(T.cr)} · cacheW ${nf(T.cw)}`;
+
+  $('tQ').textContent=int(T.q)+' คำถาม';
+  const avgQ=T.q?T.tok/T.q:0;
+  $('tQSub').textContent=`${int(T.n)} req · เฉลี่ย ${nf(avgQ)} tok/คำถาม · active ${s.active.n}`;
+
+  $('wTok').textContent=nf(W.tok);
+  const activeDays=Math.max(1,s.daily.slice(0,7).filter(d=>d.tok>0).length);
+  $('wSub').textContent=`เฉลี่ย ${nf(W.tok/activeDays)}/วัน · ${int(W.q)} คำถาม · ${int(W.n)} req`;
+
+  $('tCache').textContent=(s.cache.today*100).toFixed(1)+'%';
+  $('tCacheSub').textContent=`7D ${(s.cache.week*100).toFixed(1)}% · all-time ${(s.cache.all*100).toFixed(1)}%`;
+
+  $('tCost').textContent=usd(T.cost);
+  $('tCostSub').textContent=`฿${int(T.cost*thb)} วันนี้ · 7D ${usd(W.cost)} (฿${int(W.cost*thb)}) · all ${usd(ALL.cost)}`;
+
+  // Legend
+  $('legend').innerHTML='<span>'+agKeys.map(k=>`<b style="background:${COL[k]}"></b>${NAMES[k]}`).join('')+'</span><span id="rangeSummary"></span>';
+
+  // Daily Volume Table
+  const maxDayTok=Math.max(1,...s.daily.map(d=>d.tok));
+  const todayStr=s.historyDays[0];
+  $('dailyAvg').textContent=`เฉลี่ย 7 วัน: ${nf(W.tok/activeDays)} tok/วัน · ${int(W.n/activeDays)} req/วัน`;
+  $('dailyTbl').innerHTML='<tr><th class="l">วันที่</th><th>คำถาม</th><th>Requests</th><th>Input</th><th>Output</th><th>Cache R</th><th>Cache W</th><th class="l">Total Tokens</th><th>Cost</th><th class="l">ค่าย AI</th></tr>'+
+    s.daily.map(d=>{
+      const pct=Math.round(d.tok/maxDayTok*100);
+      const agBadges=Object.keys(d.byAgent).map(a=>`<span class="tag ${a}" style="margin-right:3px">${NAMES[a]} ${nf(d.byAgent[a].tok)}</span>`).join('');
+      return `<tr><td class="l"><b>${d.date}</b>${d.date===todayStr?' <span class="badge run">วันนี้</span>':''}</td><td>${int(d.q)}</td><td>${int(d.n)}</td><td>${nf(d.i)}</td><td>${nf(d.o)}</td><td>${nf(d.cr)}</td><td>${nf(d.cw)}</td><td class="l"><span class="vol-bar" style="width:${Math.max(2,pct*0.8)}px"></span><b>${nf(d.tok)}</b></td><td>${usd(d.cost)} <span class="sub">(฿${int(d.cost*thb)})</span></td><td class="l">${agBadges||'-'}</td></tr>`;
+    }).join('');
+
+  // Agent Breakdown
+  $('cmp').innerHTML=agKeys.length?agKeys.map(k=>{
+    const a=s.agents[k].all,t=s.agents[k].today,w=s.agents[k].week,cr=(a.i+a.cr+a.cw)?a.cr/(a.i+a.cr+a.cw):0;
+    return `<div class="ag-box"><span class="tag ${k}">${NAMES[k]}</span><div class="big">${nf(t.tok)} <span class="sub">วันนี้</span></div>
+      <div class="sub">7D ${nf(w.tok)} · all ${nf(a.tok)}</div>
+      <div class="sub">${usd(t.cost)} วันนี้ · ${usd(a.cost)} all</div>
+      <div class="sub">${int(a.q)} คำถาม · ${int(a.n)} req · cache ${(cr*100).toFixed(0)}%</div>
+      <div class="sub">in ${nf(a.i)} · out ${nf(a.o)} · cr ${nf(a.cr)}</div></div>`;
+  }).join(''):'<div class="sub">ยังไม่มีข้อมูลจากค่าย AI ใดๆ</div>';
+
+  // Models Table
+  const totM=Math.max(1,ALL.tok);
+  $('models').innerHTML='<tr><th class="l">Model</th><th>Req</th><th>Input</th><th>Output</th><th>Cache</th><th>Total</th><th>Share</th><th>Cost</th></tr>'+
+    s.models.map(m=>`<tr><td class="l"><span class="tag ${m.agent}">${m.family}</span> ${esc(m.model)}</td><td>${int(m.n)}</td><td>${nf(m.i)}</td><td>${nf(m.o)}</td><td>${nf(m.cr+m.cw)}</td><td><b>${nf(m.tok)}</b></td><td>${(m.tok/totM*100).toFixed(1)}%</td><td>${usd(m.cost)}</td></tr>`).join('');
+
+  // Populate history filters once (or when new agents appear)
+  if(!filtersInit){
+    filtersInit=true;
+    for(const d of s.historyDays){
+      $('tDay').add(new Option(d===todayStr?d+' (วันนี้)':d,d));
+      $('rDay').add(new Option(d===todayStr?d+' (วันนี้)':d,d));
+    }
+  }
+  syncAgentSelect($('tAg'),agKeys);
+  syncAgentSelect($('rAg'),agKeys);
+  $('retNote').textContent=`เก็บรายละเอียด ${s.retentionDays} วัน (${int(s.count)} req ในหน่วยความจำ)`;
+
   chart();
+  if(tPage===1 && $('tDay').value==='all' && $('tAg').value==='all' && !$('tQry').value) renderTurnsTable(s.turns, s.turnCount);
+  if(rPage===1 && $('rDay').value==='all' && $('rAg').value==='all' && !$('rQry').value) renderReqTable(s.feed, s.count);
+}
+
+function syncAgentSelect(sel,keys){
+  const cur=new Set([...sel.options].map(o=>o.value));
+  for(const k of keys) if(!cur.has(k)) sel.add(new Option(NAMES[k]||k,k));
+}
+
+function renderTurnsTable(items,total){
+  $('turnsTbl').innerHTML='<tr><th class="l">เวลา</th><th class="l">ค่าย</th><th class="l">คำถาม (Prompt)</th><th class="l">สถานะ</th><th>ขั้นตอน</th><th>ใช้เวลา</th><th>Input</th><th>Output</th><th>Cache</th><th>Total Tokens</th><th>Cost</th></tr>'+
+    (items.length?items.map(t=>{
+      const st=t.status==='running'?'<span class="badge run">กำลังตอบ</span>':'<span class="badge">เสร็จสิ้น</span>';
+      const intr=t.interrupts?` <span class="badge int">+${t.interrupts} แทรก</span>`:'';
+      const dt=new Date(t.t0).toLocaleString('th-TH',{hour12:false,month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      return `<tr><td class="l">${dt}</td><td class="l"><span class="tag ${t.a}">${NAMES[t.a]||t.a}</span></td><td class="l wrap-tx">${esc(t.prompt||'(session '+t.s+')')}</td><td class="l">${st}${intr}</td><td>${int(t.steps)} req</td><td>${fmtDur(t.t1-t.t0)}</td><td>${nf(t.i)}</td><td>${nf(t.o)}</td><td>${nf(t.cr+t.cw)}</td><td><b>${nf(t.tok)}</b></td><td>${usd(t.cost)}</td></tr>`;
+    }).join(''):'<tr><td colspan="11" class="l sub">ยังไม่มีข้อมูลคำถาม</td></tr>');
+  $('tInfo').textContent=`ทั้งหมด ${int(total)} คำถาม (หน้า ${tPage})`;
+  $('tPrev').disabled=tPage<=1;
+  $('tNext').disabled=tPage*50>=total;
+}
+
+function renderReqTable(items,total){
+  const top=items.length?items[0].t:0;
+  $('reqTbl').innerHTML='<tr><th class="l">เวลา</th><th class="l">ค่าย</th><th class="l">Model</th><th class="l">Session</th><th>Input</th><th>Output</th><th>Cache R</th><th>Cache W</th><th>Total</th><th>Cost</th></tr>'+
+    (items.length?items.map(f=>{
+      const tot=f.i+f.o+f.cr+f.cw;
+      return `<tr class="${f.t>lastTop&&lastTop?'new':''}"><td class="l">${new Date(f.t).toLocaleString('th-TH',{hour12:false,month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'})}</td><td class="l"><span class="tag ${f.a}">${NAMES[f.a]||f.a}</span></td><td class="l">${esc(f.m)}</td><td class="l sub">${esc(f.s)}</td><td>${int(f.i)}</td><td>${int(f.o)}</td><td>${int(f.cr)}</td><td>${int(f.cw)}</td><td><b>${int(tot)}</b></td><td>${usd(f.cost)}</td></tr>`;
+    }).join(''):'<tr><td colspan="10" class="l sub">ไม่พบข้อมูลในช่วง 7 วัน</td></tr>');
+  if(rPage===1) lastTop=top;
+  $('rInfo').textContent=`ทั้งหมด ${int(total)} requests (หน้า ${rPage})`;
+  $('rPrev').disabled=rPage<=1;
+  $('rNext').disabled=rPage*100>=total;
+}
+
+async function fetchTurns(){
+  const p=new URLSearchParams({day:$('tDay').value,agent:$('tAg').value,q:$('tQry').value,page:tPage,limit:50});
+  const res=await fetch('/api/turns?'+p);const j=await res.json();
+  renderTurnsTable(j.items,j.total);
+}
+async function fetchReqs(){
+  const p=new URLSearchParams({day:$('rDay').value,agent:$('rAg').value,q:$('rQry').value,page:rPage,limit:100});
+  const res=await fetch('/api/requests?'+p);const j=await res.json();
+  renderReqTable(j.items,j.total);
 }
 
 function chart(){
-  if(!S)return;const cv=$('chart'),dpr=devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;
+  if(!S)return;
+  const cv=$('chart'),dpr=devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;
   cv.width=W*dpr;cv.height=H*dpr;const g=cv.getContext('2d');g.scale(dpr,dpr);
   const data=S.series[range],agents=Object.keys(S.agents),cs=getComputedStyle(document.body);
   const mut=cs.getPropertyValue('--mut').trim()||'#888',line=cs.getPropertyValue('--line').trim()||'#333';
-  const tot=data.map(d=>agents.reduce((a,k)=>a+(d[k]?d[k].tok:0),0)),max=Math.max(1,...data.flatMap(d=>agents.map(k=>d[k]?d[k].tok:0)))*1.1;
-  const L=48,B=22,Tp=8,pw=W-L-8,ph=H-B-Tp,bw=pw/Math.max(1,data.length);
+  const val=(d,k)=>d[k]?(d[k][metric]||0):0;
+  const tot=data.map(d=>agents.reduce((a,k)=>a+val(d,k),0));
+  const max=Math.max(metric==='cost'?0.001:1,...data.flatMap(d=>agents.map(k=>val(d,k))))*1.12;
+  const L=54,B=24,Tp=10,pw=W-L-10,ph=H-B-Tp,bw=pw/Math.max(1,data.length);
+  const fmtY=v=>metric==='cost'?usd(v):nf(v);
+
   g.font='11px system-ui';g.fillStyle=mut;g.strokeStyle=line;g.textAlign='right';
-  for(let i=0;i<=4;i++){const y=Tp+ph-ph*i/4;g.beginPath();g.moveTo(L,y);g.lineTo(W-8,y);g.stroke();g.fillText(nf(max*i/4),L-4,y+4)}
-  g.textAlign='center';const step=Math.ceil(data.length/(W<500?6:14));
+  for(let i=0;i<=4;i++){const y=Tp+ph-ph*i/4;g.beginPath();g.moveTo(L,y);g.lineTo(W-10,y);g.stroke();g.fillText(fmtY(max*i/4),L-6,y+4);}
+
+  const px=i=>L+(i+.5)*bw, py=v=>Tp+ph-v/max*ph;
   S._bars=[];
-  const px=i=>L+(i+.5)*bw,py=v=>Tp+ph-v/max*ph;
+
+  // Now marker for 6-minute today view
+  if(range==='today' && S.currentSlot!=null){
+    const nx=px(S.currentSlot);
+    g.save();g.setLineDash([4,4]);g.strokeStyle=mut;g.beginPath();g.moveTo(nx,Tp);g.lineTo(nx,Tp+ph);g.stroke();g.restore();
+  }
+
   agents.forEach(k=>{
-    g.beginPath();data.forEach((d,i)=>{const y=py(d[k]?d[k].tok:0);i?g.lineTo(px(i),y):g.moveTo(px(i),y)});
-    g.lineTo(px(data.length-1),Tp+ph);g.lineTo(px(0),Tp+ph);g.closePath();g.globalAlpha=.08;g.fillStyle=COL[k];g.fill();g.globalAlpha=1;
-    g.beginPath();data.forEach((d,i)=>{const y=py(d[k]?d[k].tok:0);i?g.lineTo(px(i),y):g.moveTo(px(i),y)});
-    g.strokeStyle=COL[k];g.lineWidth=2;g.lineJoin='round';g.stroke();g.lineWidth=1;
-    if(data.length<=31)data.forEach((d,i)=>{g.beginPath();g.arc(px(i),py(d[k]?d[k].tok:0),2.5,0,7);g.fillStyle=COL[k];g.fill()})});
-  g.strokeStyle=line;
-  data.forEach((d,i)=>{if(i%step===0){g.fillStyle=mut;g.fillText(d.label,px(i),H-6)}
-    S._bars.push({x:L+i*bw,w:bw,d,tot:tot[i]})});
-  $('rangeName').textContent={today:'วันนี้ (รายชั่วโมง)',week:'7 วันล่าสุด',month:'30 วันล่าสุด',all:'ทั้งหมด'}[range]+' · ';
-  const sumT=tot.reduce((a,b)=>a+b,0),sumC=data.reduce((a,d)=>a+agents.reduce((s,k)=>s+(d[k]?d[k].cost:0),0),0);
-  $('rangeSum').textContent=`${nf(sumT)} tokens · ${usd(sumC)} (฿${int(sumC*S.thb)})`;
+    g.beginPath();data.forEach((d,i)=>{const y=py(val(d,k));i?g.lineTo(px(i),y):g.moveTo(px(i),y);});
+    g.lineTo(px(data.length-1),Tp+ph);g.lineTo(px(0),Tp+ph);g.closePath();g.globalAlpha=.10;g.fillStyle=COL[k];g.fill();g.globalAlpha=1;
+    g.beginPath();data.forEach((d,i)=>{const y=py(val(d,k));i?g.lineTo(px(i),y):g.moveTo(px(i),y);});
+    g.strokeStyle=COL[k];g.lineWidth=1.8;g.lineJoin='round';g.stroke();g.lineWidth=1;
+    if(data.length<=35) data.forEach((d,i)=>{g.beginPath();g.arc(px(i),py(val(d,k)),2.5,0,7);g.fillStyle=COL[k];g.fill();});
+  });
+
+  // Hover crosshair & active point highlight
+  if(hoverIdx>=0 && hoverIdx<data.length){
+    const hx=px(hoverIdx);
+    g.save();g.strokeStyle=mut;g.lineWidth=1;g.beginPath();g.moveTo(hx,Tp);g.lineTo(hx,Tp+ph);g.stroke();
+    agents.forEach(k=>{
+      const v=val(data[hoverIdx],k);
+      g.beginPath();g.arc(hx,py(v),4,0,7);g.fillStyle=COL[k];g.fill();
+      g.strokeStyle='#fff';g.lineWidth=1.5;g.stroke();
+    });
+    g.restore();
+  }
+
+  g.textAlign='center';g.fillStyle=mut;
+  const step=range==='today'?(W<640?30:20):Math.ceil(data.length/(W<500?6:14));
+  data.forEach((d,i)=>{
+    if(i%step===0) g.fillText(d.label,px(i),H-6);
+    S._bars.push({idx:i,x:L+i*bw,w:bw,d,tot:tot[i]});
+  });
+
+  const rName={today:'วันนี้ (ราย 6 นาที)',week:'7 วันล่าสุด',month:'30 วันล่าสุด',all:'ทั้งหมด'}[range];
+  const sumT=data.reduce((a,d)=>a+agents.reduce((s,k)=>s+(d[k]?d[k].tok:0),0),0);
+  const sumN=data.reduce((a,d)=>a+agents.reduce((s,k)=>s+(d[k]?d[k].n:0),0),0);
+  const sumC=data.reduce((a,d)=>a+agents.reduce((s,k)=>s+(d[k]?d[k].cost:0),0),0);
+  $('rangeSummary').innerHTML=`<b>${rName}</b> · ${nf(sumT)} tokens · ${int(sumN)} req · ${usd(sumC)} (฿${int(sumC*S.thb)})`;
 }
+
 $('chart').addEventListener('mousemove',e=>{
-  if(!S||!S._bars)return;const r=e.target.getBoundingClientRect(),x=e.clientX-r.left,b=S._bars.find(b=>x>=b.x&&x<b.x+b.w);
-  if(!tip){tip=document.createElement('div');tip.style.cssText='position:fixed;pointer-events:none;background:#000d;color:#fff;padding:6px 8px;border-radius:6px;font-size:12px;z-index:9';document.body.appendChild(tip)}
-  if(!b){tip.style.display='none';return}
-  const c=Object.keys(S.agents).reduce((a,k)=>a+(b.d[k]?b.d[k].cost:0),0);
-  tip.innerHTML=`<b>${b.d.label}</b><br>${int(b.tot)} tokens<br>${usd(c)} · ฿${int(c*S.thb)}`+Object.keys(S.agents).map(k=>b.d[k]?`<br><span style="color:${COL[k]}">●</span> ${NAMES[k]} ${nf(b.d[k].tok)}`:'').join('');
-  tip.style.display='block';tip.style.left=e.clientX+12+'px';tip.style.top=e.clientY+12+'px'});
-$('chart').addEventListener('mouseleave',()=>{if(tip)tip.style.display='none'});
-$('tabs').addEventListener('click',e=>{const r=e.target.dataset.r;if(!r)return;range=r;[...$('tabs').children].forEach(b=>b.classList.toggle('on',b===e.target));chart()});
-$('cfgSave').onclick=()=>fetch('/api/config',{method:'POST',body:JSON.stringify({budget:{dailyTokens:$('cfgTok').value,dailyCostUsd:$('cfgUsd').value}})});
+  if(!S||!S._bars)return;
+  const r=e.target.getBoundingClientRect(),x=e.clientX-r.left;
+  const b=S._bars.find(b=>x>=b.x&&x<b.x+b.w);
+  if(!tip){tip=document.createElement('div');tip.style.cssText='position:fixed;pointer-events:none;background:#11141be6;border:1px solid #333;color:#fff;padding:8px 10px;border-radius:8px;font-size:12px;z-index:99;box-shadow:0 6px 20px #0006';document.body.appendChild(tip);}
+  if(!b){hoverIdx=-1;tip.style.display='none';chart();return;}
+  if(hoverIdx!==b.idx){hoverIdx=b.idx;chart();}
+  const agents=Object.keys(S.agents);
+  const tTok=agents.reduce((a,k)=>a+(b.d[k]?b.d[k].tok:0),0);
+  const tReq=agents.reduce((a,k)=>a+(b.d[k]?b.d[k].n:0),0);
+  const tCost=agents.reduce((a,k)=>a+(b.d[k]?b.d[k].cost:0),0);
+  const title=range==='today'?`เวลา ${b.d.label} - ${b.d.endLabel}`:(b.d.date||b.d.label);
+  tip.innerHTML=`<div style="font-weight:700;margin-bottom:4px">${title}</div>`+
+    `<div>รวม: <b>${int(tTok)}</b> tokens (${int(tReq)} req)</div>`+
+    `<div>ค่าใช้จ่าย: ${usd(tCost)} · ฿${int(tCost*S.thb)}</div>`+
+    agents.map(k=>b.d[k]?`<div style="margin-top:2px"><span style="color:${COL[k]}">●</span> ${NAMES[k]}: <b>${nf(b.d[k].tok)}</b> (${int(b.d[k].n)} req)</div>`:'').join('');
+  tip.style.display='block';
+  const left=Math.min(window.innerWidth-220,e.clientX+14);
+  tip.style.left=left+'px';tip.style.top=(e.clientY+14)+'px';
+});
+$('chart').addEventListener('mouseleave',()=>{hoverIdx=-1;if(tip)tip.style.display='none';chart();});
+$('tabs').addEventListener('click',e=>{const r=e.target.dataset.r;if(!r)return;range=r;[...$('tabs').children].forEach(b=>b.classList.toggle('on',b===e.target));chart();});
+$('mtabs').addEventListener('click',e=>{const m=e.target.dataset.m;if(!m)return;metric=m;[...$('mtabs').children].forEach(b=>b.classList.toggle('on',b===e.target));chart();});
+
+['tDay','tAg'].forEach(id=>$(id).addEventListener('change',()=>{tPage=1;fetchTurns();}));
+$('tQry').addEventListener('input',()=>{tPage=1;fetchTurns();});
+$('tPrev').onclick=()=>{if(tPage>1){tPage--;fetchTurns();}};
+$('tNext').onclick=()=>{tPage++;fetchTurns();};
+
+['rDay','rAg'].forEach(id=>$(id).addEventListener('change',()=>{rPage=1;fetchReqs();}));
+$('rQry').addEventListener('input',()=>{rPage=1;fetchReqs();});
+$('rPrev').onclick=()=>{if(rPage>1){rPage--;fetchReqs();}};
+$('rNext').onclick=()=>{rPage++;fetchReqs();};
+
 addEventListener('resize',chart);
 const es=new EventSource('/events');
-es.onmessage=e=>{$('conn').lastChild.textContent='live';render(JSON.parse(e.data))};
-es.onerror=()=>{$('conn').lastChild.textContent='reconnecting…'};
+es.onmessage=e=>{$('conn').lastChild.textContent='live';render(JSON.parse(e.data));};
+es.onerror=()=>{$('conn').lastChild.textContent='reconnecting…';};
 </script>
 </body>
 </html>
