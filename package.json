@@ -1,0 +1,6 @@
+{
+  "name": "token-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": { "start": "node --expose-gc --max-semi-space-size=1 --optimize-for-size --jitless server.js" }
+}
